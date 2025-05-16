@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Activity Code Management</title>
-  <link href="https://fonts.googleapis.com/css2?family=Aptos:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Aptos:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
     <div class="header-content">
       <h1>Change Maker by IPI</h1>
       <div class="logo">
-        <img src="IPI_Primary_Identity.png" alt="IPI Logo"/>
+        <img src="IPI_Primary_Identity.png" alt="IPI Logo" />
       </div>
     </div>
   </header>
@@ -20,157 +20,203 @@
   <main class="content-area">
     <div class="app-window">
       <div class="form-section">
-        <h2>Manage Business Units and Activity Codes</h2>
-        <div id="auth-message" class="status-message info">Authenticating…</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="business-units">Select Business Units</label>
-            <select id="business-units" multiple disabled></select>
-          </div>
+        <!-- Config snippet starts here -->
+        <h1>Manage Business Units and Activity Codes</h1>
+
+        <div id="auth-message" class="auth-loading">Authenticating with PureCloud...</div>
+
+        <!-- Business Units Dropdown -->
+        <label for="business-units">Select Business Units:</label>
+        <select id="business-units" multiple disabled>
+          <!-- Options will be populated dynamically via JavaScript -->
+        </select>
+
+        <hr />
+
+        <!-- Activity Code Creation Form -->
+        <h2>Create Activity Code</h2>
+
+        <label for="activity-name">Activity Name:</label>
+        <input type="text" id="activity-name" placeholder="Enter activity name" required disabled />
+
+        <label for="category">Category:</label>
+        <select id="category" required disabled>
+          <option value="">Select category</option>
+          <option value="OnQueueWork">OnQueueWork</option>
+          <option value="Break">Break</option>
+          <option value="Meal">Meal</option>
+          <option value="Meeting">Meeting</option>
+          <option value="OffQueueWork">OffQueueWork</option>
+          <option value="TimeOff">TimeOff</option>
+          <option value="Training">Training</option>
+          <option value="Unavailable">Unavailable</option>
+          <option value="Unscheduled">Unscheduled</option>
+        </select>
+
+        <label for="length">Default Length (minutes):</label>
+        <input type="number" id="length" placeholder="Enter default length" disabled />
+
+        <label>Options:</label>
+
+        <div class="checkbox-container">
+          <input type="checkbox" id="paid-time" value="countsAsPaidTime" disabled />
+          <label for="paid-time">Counts as Paid Time</label>
         </div>
-        <hr/>
-        <h3>Create Activity Code</h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="activity-name">Activity Name</label>
-            <input type="text" id="activity-name" disabled/>
-          </div>
-          <div class="form-group">
-            <label for="category">Category</label>
-            <select id="category" disabled>
-              <option value="">—</option>
-              <option>OnQueueWork</option>
-              <option>Break</option>
-              <option>Meal</option>
-              <option>Meeting</option>
-              <option>OffQueueWork</option>
-              <option>TimeOff</option>
-              <option>Training</option>
-              <option>Unavailable</option>
-              <option>Unscheduled</option>
-            </select>
-          </div>
+
+        <div class="checkbox-container">
+          <input type="checkbox" id="work-time" value="countsAsWorkTime" disabled />
+          <label for="work-time">Counts as Work Time</label>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="length">Default Length (min)</label>
-            <input type="number" id="length" disabled/>
-          </div>
+
+        <div class="checkbox-container">
+          <input type="checkbox" id="time-off-selectable" value="agentTimeOffSelectable" disabled />
+          <label for="time-off-selectable">Agent Time Off Selectable</label>
         </div>
-        <div class="form-group">
-          <label>Options</label>
-          <div class="checkbox-grid">
-            <label class="checkbox-container">
-              <input type="checkbox" id="paid-time" disabled/> Counts as Paid Time
-            </label>
-            <label class="checkbox-container">
-              <input type="checkbox" id="work-time" disabled/> Counts as Work Time
-            </label>
-            <label class="checkbox-container">
-              <input type="checkbox" id="time-off-selectable" disabled/> Agent Time Off Selectable
-            </label>
-            <label class="checkbox-container">
-              <input type="checkbox" id="shrinkage" disabled/> Counts Toward Shrinkage
-            </label>
-            <label class="checkbox-container">
-              <input type="checkbox" id="planned-shrinkage" disabled/> Planned Shrinkage
-            </label>
-            <label class="checkbox-container">
-              <input type="checkbox" id="interruptible" disabled/> Interruptible
-            </label>
-          </div>
+
+        <div class="checkbox-container">
+          <input type="checkbox" id="shrinkage" value="countsTowardShrinkage" disabled />
+          <label for="shrinkage">Counts Toward Shrinkage</label>
         </div>
-        <button id="create-button" disabled>Create Activity Code</button>
-        <div id="activityResults" class="status-message" style="display:none;"></div>
+
+        <div class="checkbox-container">
+          <input type="checkbox" id="planned-shrinkage" value="plannedShrinkage" disabled />
+          <label for="planned-shrinkage">Planned Shrinkage</label>
+        </div>
+
+        <div class="checkbox-container">
+          <input type="checkbox" id="interruptible" value="interruptible" disabled />
+          <label for="interruptible">Interruptible</label>
+        </div>
+
+        <button id="create-button" onclick="createActivityCode()" disabled>Create Activity Code for Selected Business Units</button>
+
+        <div id="results">
+          <!-- Results will be displayed here -->
+        </div>
+        <!-- Config snippet ends here -->
       </div>
     </div>
   </main>
 
   <script>
-    // ——— Only the Activity Code tab’s JS ———
-    const REGION = 'mypurecloud.ie',
-          TOKEN = sessionStorage.getItem('purecloud_token');
+    // OAuth Configuration
+    const clientId = 'f93a488c-73e9-40cf-b4fd-5c05ff043c81';
+    const redirectUri = window.location.href.split('?')[0];
+    const responseType = 'token';
+    const oauthUrl = `https://login.mypurecloud.ie/oauth/authorize?client_id=${clientId}&response_type=${responseType}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+
+    let accessToken = null;
 
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('auth-message').innerText = 'Loading…';
-      Promise.resolve()
-        .then(fetchBusinessUnits)
-        .then(() => {
-          document.getElementById('auth-message').innerText = 'Ready';
-          document.getElementById('activity-name').disabled = false;
-          document.getElementById('category').disabled = false;
-          document.getElementById('length').disabled = false;
-          ['paid-time','work-time','time-off-selectable','shrinkage','planned-shrinkage','interruptible'].forEach(id=>{
-            document.getElementById(id).disabled = false;
-          });
-          const btn = document.getElementById('create-button');
-          btn.disabled = false;
-          btn.addEventListener('click', createActivityCode);
-        })
-        .catch(e=>{
-          document.getElementById('auth-message').innerText = 'Error: '+ e.message;
-        });
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      accessToken = params.get('access_token');
+
+      if (accessToken) {
+        sessionStorage.setItem('purecloud_token', accessToken);
+        initializeApplication();
+      } else if (sessionStorage.getItem('purecloud_token')) {
+        accessToken = sessionStorage.getItem('purecloud_token');
+        initializeApplication();
+      } else {
+        window.location.href = oauthUrl;
+      }
     });
 
+    function initializeApplication() {
+      document.getElementById('auth-message').textContent = 'Authenticated successfully!';
+      document.getElementById('auth-message').style.display = 'none';
+
+      // Enable form elements
+      [
+        'business-units','activity-name','category','length',
+        'paid-time','work-time','time-off-selectable',
+        'shrinkage','planned-shrinkage','interruptible','create-button'
+      ].forEach(id => document.getElementById(id).disabled = false);
+
+      fetchBusinessUnits();
+    }
+
     async function fetchBusinessUnits() {
-      let all = [], page=1, more=true;
-      while(more){
-        const r=await fetch(`https://api.${REGION}/api/v2/workforcemanagement/businessunits?pageSize=100&pageNumber=${page}`,{
-          headers:{Authorization:`Bearer ${TOKEN}`}})
-        const d=await r.json();
-        all.push(...d.entities);
-        page<d.pageCount? page++ : more=false;
+      try {
+        const apiUrl = 'https://api.mypurecloud.ie/api/v2/workforcemanagement/businessunits?pageSize=100';
+        let businessUnits = [], nextPageUrl = apiUrl;
+
+        while (nextPageUrl) {
+          const response = await fetch(nextPageUrl, {
+            headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }
+          });
+          const data = await response.json();
+
+          if (response.ok) {
+            businessUnits = businessUnits.concat(data.entities);
+            nextPageUrl = data.pageCount > data.pageNumber ? `${apiUrl}&pageNumber=${data.pageNumber+1}` : null;
+          } else {
+            throw new Error(data.message || 'Error fetching business units');
+          }
+        }
+
+        const select = document.getElementById('business-units');
+        businessUnits.forEach(unit => {
+          const option = document.createElement('option');
+          option.value = unit.id;
+          option.textContent = unit.name;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        document.getElementById('results').innerHTML = `<p class="error">Error loading business units: ${error.message}</p>`;
       }
-      const sel = document.getElementById('business-units');
-      sel.innerHTML = '';
-      all.sort((a,b)=>a.name.localeCompare(b.name))
-         .forEach(u => sel.add(new Option(u.name,u.id)));
     }
 
     async function createActivityCode() {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+
       const name = document.getElementById('activity-name').value.trim();
       const category = document.getElementById('category').value;
-      const units = Array.from(document.getElementById('business-units').selectedOptions).map(o=>o.value);
-      const out = document.getElementById('activityResults');
+      const businessUnits = Array.from(document.getElementById('business-units').selectedOptions).map(o => o.value);
 
-      if (!name||!category||!units.length) {
-        return out.innerText='Name, Category & at least one BU required.', out.className='status-message error', out.style.display='block';
+      if (!name || !category || businessUnits.length === 0) {
+        resultsDiv.innerHTML = '<p class="error">Name, category, and at least one business unit are required.</p>';
+        return;
       }
 
-      let success=0, fails=[];
-      for (let bu of units) {
+      const lengthInMinutes = parseInt(document.getElementById('length').value, 10) || null;
+      const flags = {
+        countsAsPaidTime: document.getElementById('paid-time').checked,
+        countsAsWorkTime: document.getElementById('work-time').checked,
+        agentTimeOffSelectable: document.getElementById('time-off-selectable').checked,
+        countsTowardShrinkage: document.getElementById('shrinkage').checked,
+        plannedShrinkage: document.getElementById('planned-shrinkage').checked,
+        interruptible: document.getElementById('interruptible').checked
+      };
+
+      let successCount = 0, errorCount = 0, errorMessages = [];
+
+      for (const buId of businessUnits) {
         try {
-          const resp = await fetch(`https://api.${REGION}/api/v2/workforcemanagement/businessunits/${bu}/activitycodes`, {
-            method:'POST',
-            headers:{
-              Authorization:`Bearer ${TOKEN}`, 'Content-Type':'application/json'
-            },
-            body: JSON.stringify({
-              name, category,
-              lengthInMinutes: parseInt(document.getElementById('length').value)||0,
-              countsAsPaidTime:document.getElementById('paid-time').checked,
-              countsAsWorkTime:document.getElementById('work-time').checked,
-              agentTimeOffSelectable:document.getElementById('time-off-selectable').checked,
-              countsTowardShrinkage:document.getElementById('shrinkage').checked,
-              plannedShrinkage:document.getElementById('planned-shrinkage').checked,
-              interruptible:document.getElementById('interruptible').checked,
-              secondaryPresences:[]
-            })
-          });
-          if (!resp.ok) throw new Error((await resp.json()).message||resp.status);
-          success++;
-        } catch(e){
-          fails.push(`${bu}: ${e.message}`);
+          const response = await fetch(
+            `https://api.mypurecloud.ie/api/v2/workforcemanagement/businessunits/${buId}/activitycodes`,
+            {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name, category, lengthInMinutes, ...flags })
+            }
+          );
+          const data = await response.json();
+
+          if (response.ok) successCount++;
+          else { errorCount++; errorMessages.push(`BU ${buId}: ${data.message || 'Unknown error'}`); }
+        } catch (err) {
+          errorCount++; errorMessages.push(`BU ${buId}: ${err.message}`);
         }
       }
 
-      if (fails.length===0) {
-        out.innerText=`Created in all ${success} BUs.`; out.className='status-message success';
+      if (errorCount === 0) {
+        resultsDiv.innerHTML = `<p class="success">Activity code created in all ${successCount} business units.</p>`;
       } else {
-        out.innerHTML=`Success:${success}<br>Failed:<ul>${fails.map(f=>`<li>${f}</li>`).join('')}</ul>`;
-        out.className='status-message warning';
+        resultsDiv.innerHTML = `<p class="success">Created in ${successCount} BUs.</p><p class="error">Failed in ${errorCount} BUs:</p><ul>${errorMessages.map(m => `<li>${m}</li>`).join('')}</ul>`;
       }
-      out.style.display='block';
     }
   </script>
 </body>
