@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Activity Code Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Aptos:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <h1>Change Maker by IPI</h1>
+      <div class="logo">
+        <img src="IPI_Primary_Identity.png" alt="IPI Logo"/>
+      </div>
+    </div>
+  </header>
+
+  <main class="content-area">
+    <div class="app-window">
+      <div class="form-section">
+        <h2>Manage Business Units and Activity Codes</h2>
+        <div id="auth-message" class="status-message info">Authenticating…</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="business-units">Select Business Units</label>
+            <select id="business-units" multiple disabled></select>
+          </div>
+        </div>
+        <hr/>
+        <h3>Create Activity Code</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="activity-name">Activity Name</label>
+            <input type="text" id="activity-name" disabled/>
+          </div>
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" disabled>
+              <option value="">—</option>
+              <option>OnQueueWork</option>
+              <option>Break</option>
+              <option>Meal</option>
+              <option>Meeting</option>
+              <option>OffQueueWork</option>
+              <option>TimeOff</option>
+              <option>Training</option>
+              <option>Unavailable</option>
+              <option>Unscheduled</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="length">Default Length (min)</label>
+            <input type="number" id="length" disabled/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Options</label>
+          <div class="checkbox-grid">
+            <label class="checkbox-container">
+              <input type="checkbox" id="paid-time" disabled/> Counts as Paid Time
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" id="work-time" disabled/> Counts as Work Time
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" id="time-off-selectable" disabled/> Agent Time Off Selectable
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" id="shrinkage" disabled/> Counts Toward Shrinkage
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" id="planned-shrinkage" disabled/> Planned Shrinkage
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" id="interruptible" disabled/> Interruptible
+            </label>
+          </div>
+        </div>
+        <button id="create-button" disabled>Create Activity Code</button>
+        <div id="activityResults" class="status-message" style="display:none;"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ——— Only the Activity Code tab’s JS ———
+    const REGION = 'mypurecloud.ie',
+          TOKEN = sessionStorage.getItem('purecloud_token');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('auth-message').innerText = 'Loading…';
+      Promise.resolve()
+        .then(fetchBusinessUnits)
+        .then(() => {
+          document.getElementById('auth-message').innerText = 'Ready';
+          document.getElementById('activity-name').disabled = false;
+          document.getElementById('category').disabled = false;
+          document.getElementById('length').disabled = false;
+          ['paid-time','work-time','time-off-selectable','shrinkage','planned-shrinkage','interruptible'].forEach(id=>{
+            document.getElementById(id).disabled = false;
+          });
+          const btn = document.getElementById('create-button');
+          btn.disabled = false;
+          btn.addEventListener('click', createActivityCode);
+        })
+        .catch(e=>{
+          document.getElementById('auth-message').innerText = 'Error: '+ e.message;
+        });
+    });
+
+    async function fetchBusinessUnits() {
+      let all = [], page=1, more=true;
+      while(more){
+        const r=await fetch(`https://api.${REGION}/api/v2/workforcemanagement/businessunits?pageSize=100&pageNumber=${page}`,{
+          headers:{Authorization:`Bearer ${TOKEN}`}})
+        const d=await r.json();
+        all.push(...d.entities);
+        page<d.pageCount? page++ : more=false;
+      }
+      const sel = document.getElementById('business-units');
+      sel.innerHTML = '';
+      all.sort((a,b)=>a.name.localeCompare(b.name))
+         .forEach(u => sel.add(new Option(u.name,u.id)));
+    }
+
+    async function createActivityCode() {
+      const name = document.getElementById('activity-name').value.trim();
+      const category = document.getElementById('category').value;
+      const units = Array.from(document.getElementById('business-units').selectedOptions).map(o=>o.value);
+      const out = document.getElementById('activityResults');
+
+      if (!name||!category||!units.length) {
+        return out.innerText='Name, Category & at least one BU required.', out.className='status-message error', out.style.display='block';
+      }
+
+      let success=0, fails=[];
+      for (let bu of units) {
+        try {
+          const resp = await fetch(`https://api.${REGION}/api/v2/workforcemanagement/businessunits/${bu}/activitycodes`, {
+            method:'POST',
+            headers:{
+              Authorization:`Bearer ${TOKEN}`, 'Content-Type':'application/json'
+            },
+            body: JSON.stringify({
+              name, category,
+              lengthInMinutes: parseInt(document.getElementById('length').value)||0,
+              countsAsPaidTime:document.getElementById('paid-time').checked,
+              countsAsWorkTime:document.getElementById('work-time').checked,
+              agentTimeOffSelectable:document.getElementById('time-off-selectable').checked,
+              countsTowardShrinkage:document.getElementById('shrinkage').checked,
+              plannedShrinkage:document.getElementById('planned-shrinkage').checked,
+              interruptible:document.getElementById('interruptible').checked,
+              secondaryPresences:[]
+            })
+          });
+          if (!resp.ok) throw new Error((await resp.json()).message||resp.status);
+          success++;
+        } catch(e){
+          fails.push(`${bu}: ${e.message}`);
+        }
+      }
+
+      if (fails.length===0) {
+        out.innerText=`Created in all ${success} BUs.`; out.className='status-message success';
+      } else {
+        out.innerHTML=`Success:${success}<br>Failed:<ul>${fails.map(f=>`<li>${f}</li>`).join('')}</ul>`;
+        out.className='status-message warning';
+      }
+      out.style.display='block';
+    }
+  </script>
+</body>
+</html>
